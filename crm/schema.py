@@ -4,6 +4,7 @@ from graphene_django import DjangoObjectType
 from django.db import transaction
 from django.utils import timezone
 from .models import Customer, Product, Order
+from .filters import CustomerFilter, ProductFilter, OrderFilter
 
 # -----------------------------
 # GraphQL Types
@@ -24,6 +25,31 @@ class OrderType(DjangoObjectType):
     class Meta:
         model = Order
         fields = ("id", "customer", "products", "total_amount", "order_date")
+
+# --- Query Class ---
+class Query(graphene.ObjectType):
+    all_customers = DjangoFilterConnectionField(CustomerType, order_by=graphene.String())
+    all_products = DjangoFilterConnectionField(ProductType, order_by=graphene.String())
+    all_orders = DjangoFilterConnectionField(OrderType, order_by=graphene.String())
+
+    def resolve_all_customers(self, info, order_by=None, **kwargs):
+        qs = Customer.objects.all()
+        if order_by:
+            qs = qs.order_by(order_by)
+        return qs
+
+    def resolve_all_products(self, info, order_by=None, **kwargs):
+        qs = Product.objects.all()
+        if order_by:
+            qs = qs.order_by(order_by)
+        return qs
+
+    def resolve_all_orders(self, info, order_by=None, **kwargs):
+        qs = Order.objects.all()
+        if order_by:
+            qs = qs.order_by(order_by)
+        return qs
+
 
 
 # -----------------------------
