@@ -21,6 +21,38 @@ class ProductType(DjangoObjectType):
         fields = ("id", "name", "price", "stock")
 
 
+# Define ProductType so GraphQL can represent your model
+class ProductType(DjangoObjectType):
+    class Meta:
+        model = Product
+        fields = ("id", "name", "stock")
+
+# Mutation: update low-stock products
+class UpdateLowStockProducts(graphene.Mutation):
+    class Arguments:
+        pass  # no input args needed
+
+    success = graphene.Boolean()
+    message = graphene.String()
+    updated_products = graphene.List(ProductType)
+
+    def mutate(self, info):
+        low_stock_products = Product.objects.filter(stock__lt=10)
+        updated = []
+
+        for product in low_stock_products:
+            product.stock += 10  # simulate restock
+            product.save()
+            updated.append(product)
+
+        if updated:
+            message = f"{len(updated)} products updated successfully."
+        else:
+            message = "No low-stock products found."
+
+        return UpdateLowStockProducts(success=True, message=message, updated_products=updated)
+
+
 class OrderType(DjangoObjectType):
     class Meta:
         model = Order
