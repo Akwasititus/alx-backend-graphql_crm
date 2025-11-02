@@ -38,9 +38,15 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'graphene_django',
+    'django_crontab',
     'crm',
     'django_filters',
 ]
+
+CRONJOBS = [
+    ('*/5 * * * *', 'crm.cron.log_crm_heartbeat'),
+]
+
 
 GRAPHENE = {
     "SCHEMA": "alx_backend_graphql_crm.schema.schema"  # path to our main schema
